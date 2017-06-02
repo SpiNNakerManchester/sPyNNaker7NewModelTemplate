@@ -3,6 +3,8 @@ import pylab
 import spynnaker7.pyNN as p
 
 from python_models7.neuron.builds.my_model_curr_exp import MyModelCurrExp
+from python_models7.neuron.builds.my_model_curr_exp_my_input_type \
+    import MyModelCurrExpMyInputType
 from python_models7.neuron.builds.my_model_curr_exp_my_additional_input \
     import MyModelCurrExpMyAdditionalInput
 from python_models7.neuron.builds.my_model_curr_exp_my_threshold \
@@ -52,10 +54,10 @@ def create_v_graph(population, title):
 p.setup(time_step)
 
 input_pop = p.Population(
-    1, p.SpikeSourceArray, {"spike_times": spike_times}, label="input")
+    n_neurons, p.SpikeSourceArray, {"spike_times": spike_times}, label="input")
 
 my_model_pop = p.Population(
-    1, MyModelCurrExp,
+    n_neurons, MyModelCurrExp,
     {
         "my_parameter": -70.0,
         "i_offset": i_offset,
@@ -65,8 +67,19 @@ p.Projection(
     input_pop, my_model_pop,
     p.OneToOneConnector(weights=weight))
 
+my_model_my_input_type_pop = p.Population(
+    n_neurons, MyModelCurrExpMyInputType,
+    {
+        "my_multiplicator": 0.0,
+        "my_input_parameter": 0.0,
+    },
+    label="my_model_my_input_type_pop")
+p.Projection(
+    input_pop, my_model_my_input_type_pop,
+    p.OneToOneConnector(weights=weight))
+
 my_model_my_synapse_type_pop = p.Population(
-    1, MyModelCurrMySynapseType,
+    n_neurons, MyModelCurrMySynapseType,
     {
         "my_parameter": -70.0,
         "i_offset": i_offset,
@@ -78,7 +91,7 @@ p.Projection(
     p.OneToOneConnector(weights=weight))
 
 my_model_my_additional_input_pop = p.Population(
-    1, MyModelCurrExpMyAdditionalInput,
+    n_neurons, MyModelCurrExpMyAdditionalInput,
     {
         "my_parameter": -70.0,
         "i_offset": i_offset,
@@ -90,7 +103,7 @@ p.Projection(
     p.OneToOneConnector(weights=weight))
 
 my_model_my_threshold_pop = p.Population(
-    1, MyModelCurrExpMyThreshold,
+    n_neurons, MyModelCurrExpMyThreshold,
     {
         "my_parameter": -70.0,
         "i_offset": i_offset,
@@ -103,7 +116,7 @@ p.Projection(
     p.OneToOneConnector(weights=weight))
 
 my_model_stdp_pop = p.Population(
-    1, MyModelCurrExp,
+    n_neurons, MyModelCurrExp,
     {
         "my_parameter": -70.0,
         "i_offset": i_offset,
@@ -124,6 +137,7 @@ stdp_connection = p.Projection(
     synapse_dynamics=p.SynapseDynamics(slow=stdp))
 
 my_model_pop.record_v()
+my_model_my_input_type_pop.record_v()
 my_model_my_synapse_type_pop.record_v()
 my_model_my_additional_input_pop.record_v()
 my_model_my_threshold_pop.record_v()
@@ -134,6 +148,8 @@ print stdp_connection.getWeights()
 
 create_v_graph(
     my_model_pop, "My Model")
+create_v_graph(
+    my_model_my_input_type_pop, "My Model with My Input Type")
 create_v_graph(
     my_model_my_synapse_type_pop, "My Model with My Synapse Type")
 create_v_graph(
