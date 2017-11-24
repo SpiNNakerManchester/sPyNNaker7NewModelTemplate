@@ -50,7 +50,7 @@ class MyAdditionalInput(AbstractAdditionalInput):
     @my_additional_input_parameter.setter
     def my_additional_input_parameter(self, my_additional_input_parameter):
         self._data.set_value(key=MY_PARAMETER_NAME,
-                             value=my_additional_input_parameter)
+                                   value=my_additional_input_parameter)
 
     def get_n_parameters(self):
         """ Get the number of parameters for the additional input
