@@ -1,16 +1,11 @@
 from pacman.executor.injection_decorator import inject_items
-from spinn_utilities.ranged.range_dictionary import RangeDictionary
 from spynnaker.pyNN.models.neural_properties import NeuronParameter
 from spynnaker.pyNN.models.neuron.neuron_models import AbstractNeuronModel
+from spynnaker.pyNN.utilities import utility_calls
 
 from data_specification.enums import DataType
 
 from enum import Enum
-
-# TODO create constants to EXACTLY match the parameter names
-I_OFFSET_NAME = "i_offset"
-MY_PARAMETER_NAME = "my_parameter_1"
-V_INIT_NAME = "v_init"
 
 
 class _MY_NEURON_MODEL_TYPES(Enum):
@@ -42,38 +37,41 @@ class MyNeuronModel(AbstractNeuronModel):
             v_init=-70.0):
         AbstractNeuronModel.__init__(self)
         self._n_neurons = n_neurons
-        self._data = RangeDictionary(size=n_neurons)
 
         # TODO: Store any parameters
-        self._data[I_OFFSET_NAME] = i_offset
-        self._data[MY_PARAMETER_NAME] = my_neuron_parameter
+        self._i_offset = utility_calls.convert_param_to_numpy(
+            i_offset, n_neurons)
+        self._my_neuron_parameter = utility_calls.convert_param_to_numpy(
+            my_neuron_parameter, n_neurons)
 
         # TODO: Store any state variables
-        self._data[V_INIT_NAME] = v_init
+        self._v_init = utility_calls.convert_param_to_numpy(v_init, n_neurons)
 
     # TODO: Add getters and setters for the parameters
 
     @property
     def i_offset(self):
-        return self._data[I_OFFSET_NAME]
+        return self._i_offset
 
     @i_offset.setter
     def i_offset(self, i_offset):
-        self._data.set_value(key=I_OFFSET_NAME, value=i_offset)
+        self._i_offset = utility_calls.convert_param_to_numpy(
+            i_offset, self._n_neurons)
 
     @property
     def my_neuron_parameter(self):
-        return self._data[MY_PARAMETER_NAME]
+        return self._my_neuron_parameter
 
     @my_neuron_parameter.setter
     def my_neuron_parameter(self, my_neuron_parameter):
-        self._data.set_value(
-            key=MY_PARAMETER_NAME, value=my_neuron_parameter)
+        self._my_neuron_parameter = utility_calls.convert_param_to_numpy(
+            my_neuron_parameter, self._n_neurons)
 
     # TODO: Add initialisers for the state variables
 
     def initialize_v(self, v_init):
-        self._data.set_value(key=V_INIT_NAME, value=v_init)
+        self._v_init = utility_calls.convert_param_to_numpy(
+            v_init, self._n_neurons)
 
     def get_n_neural_parameters(self):
 
@@ -90,15 +88,15 @@ class MyNeuronModel(AbstractNeuronModel):
         return [
 
             # REAL V;
-            NeuronParameter(self._data[V_INIT_NAME],
+            NeuronParameter(self._v_init,
                             _MY_NEURON_MODEL_TYPES.V_INIT.data_type),
 
             # REAL I_offset;
-            NeuronParameter(self._data[I_OFFSET_NAME],
+            NeuronParameter(self._i_offset,
                             _MY_NEURON_MODEL_TYPES.I_OFFSET.data_type),
 
             # REAL my_parameter;
-            NeuronParameter(self._data[MY_PARAMETER_NAME],
+            NeuronParameter(self._my_neuron_parameter,
                             _MY_NEURON_MODEL_TYPES.
                             MY_NEURON_PARAMETER.data_type)
         ]
